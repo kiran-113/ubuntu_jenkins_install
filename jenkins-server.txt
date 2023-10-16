@@ -1,0 +1,59 @@
+# Genaraetes Random number
+resource "random_string" "random_number" {
+  length  = 6 # Specify the desired length of the hexadecimal string
+  special = false
+}
+# key_par
+resource "tls_private_key" "oskey" {
+  algorithm = "RSA"
+}
+# creates pem file locally 
+# resource "local_file" "myterrakey" {
+#   content  = tls_private_key.oskey.private_key_pem
+#   filename = "my-ec2key.pem"
+# }
+
+resource "aws_key_pair" "this" {
+  key_name   = "my-ec2key-${random_string.random_number.result}"
+  public_key = tls_private_key.oskey.public_key_openssh
+}
+
+data "aws_ami" "latest-amazon-linux-image" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+resource "aws_instance" "myapp-server" {
+  ami                         = data.aws_ami.latest-amazon-linux-image.id
+  instance_type               = var.instance_type
+  key_name                    = aws_key_pair.this.key_name
+  subnet_id                   = aws_subnet.myapp-subnet-1.id
+  vpc_security_group_ids      = [aws_default_security_group.default-sg.id]
+  availability_zone           = var.avail_zone
+  associate_public_ip_address = true
+  user_data                   = file("jenkins-server-script.sh")
+
+  tags = {
+    Name = "${var.env_prefix}-server"
+  }
+
+}
+
+
+# This block is to get the staus of ec2 is running
+data "aws_instance" "instance_id" {
+  instance_id = aws_instance.myapp-server.id
+  depends_on  = [aws_instance.myapp-server]
+  filter {
+    name   = "instance-state-name"
+    values = ["running"]
+  }
+}
