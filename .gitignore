@@ -8,7 +8,8 @@ ref: https://www.linkedin.com/pulse/creating-key-pair-ec2-instance-running-scrip
 # Node artifact files
 node_modules/
 dist/
-
+.terraform.lock
+.terraform
 # Compiled Java class files
 *.class
 .terraform.lock.hcl

@@ -12,13 +12,14 @@ echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
 sudo apt-get update -y
 sudo apt-get install fontconfig openjdk-11-jre -y
 sudo apt-get install jenkins -y
+sudo systemctl enable jenkins
+sudo systemctl start jenkins
 cd /etc/default
 sudo sed -i 's/HTTP_PORT=8080/HTTP_PORT=8090/g' jenkins
 cd /lib/systemd/system
-sudo sed -i 's/Jenkins_port=8080/Jenkins_port=8090/g' jenkins.service
+sudo sed -i 's/Environment="JENKINS_PORT=8080"/Environment="JENKINS_PORT=8090"/g' jenkins.service
 sudo systemctl daemon-reload
-sudo systemctl enable jenkins
-sudo systemctl start jenkins
+sudo systemctl restart jenkins
 
 # Check if Jenkins service is active
 if systemctl is-active --quiet jenkins; then
