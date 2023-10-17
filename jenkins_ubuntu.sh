@@ -12,6 +12,11 @@ echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
 sudo apt-get update -y
 sudo apt-get install fontconfig openjdk-11-jre -y
 sudo apt-get install jenkins -y
+cd /etc/default
+sudo sed -i 's/HTTP_PORT=8080/HTTP_PORT=8090/g' jenkins
+cd /lib/systemd/system
+sudo sed -i 's/Jenkins_port=8080/Jenkins_port=8090/g' jenkins.service
+sudo systemctl daemon-reload
 sudo systemctl enable jenkins
 sudo systemctl start jenkins
 
@@ -58,6 +63,9 @@ echo \
   "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update -y 
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+sudo usermod -aG docker $USER
+sudo usermod -aG docker jenkins
+sudo chmod 666 /var/run/docker.sock
 sudo systemctl enable docker
 sudo systemctl start docker
 
@@ -81,4 +89,4 @@ if systemctl is-active --quiet docker; then
 else
   echo "Docker is not running and couldn't be started."
 fi
-echo "Jenkins Initial Password : $(sudo cat /var/lib/jenkins/secrets/initialAdminPassword)"
+echo "Jenkins Initial Password :::::: $(sudo cat /var/lib/jenkins/secrets/initialAdminPassword)"

@@ -42,9 +42,10 @@ resource "aws_instance" "myapp-server" {
   vpc_security_group_ids      = [aws_default_security_group.default-sg.id]
   availability_zone           = var.avail_zone
   associate_public_ip_address = true
-
-
-  #user_data                   = file("jenkins-server-script.sh")
+  root_block_device {
+    volume_type = "gp2"
+    volume_size = 20
+  }
   connection {
     type        = "ssh"
     user        = "ubuntu"
