@@ -1,22 +1,18 @@
-# Genaraetes Random number
-resource "random_string" "random_number" {
-  length  = 6 # Specify the desired length of the hexadecimal string
-  special = false
-}
-# key_par
-resource "tls_private_key" "oskey" {
-  algorithm = "RSA"
-}
-# creates pem file locally
-# resource "local_file" "myterrakey" {
-#   content  = tls_private_key.oskey.private_key_pem
-#   filename = "${aws_key_pair.this.key_name}.pem"
-# }
 
-resource "aws_key_pair" "this" {
-  key_name   = "my-ec2key-${random_string.random_number.result}"
-  public_key = tls_private_key.oskey.public_key_openssh
-}
+# key_par
+# resource "tls_private_key" "oskey" {
+#   algorithm = "RSA"
+# }
+# # creates pem file locally
+# # resource "local_file" "myterrakey" {
+# #   content  = tls_private_key.oskey.private_key_pem
+# #   filename = "${aws_key_pair.this.key_name}.pem"
+# # }
+
+# resource "aws_key_pair" "this" {
+#   key_name   = "my-ec2key-${random_string.random_number.result}"
+#   public_key = tls_private_key.oskey.public_key_openssh
+# }
 
 data "aws_ami" "amzn-linux-2023-ami" {
   most_recent = true
@@ -29,7 +25,7 @@ data "aws_ami" "amzn-linux-2023-ami" {
 }
 
 
-resource "aws_instance" "myapp-server" {
+resource "aws_instance" "myapp-server-1" {
   ami                         = data.aws_ami.amzn-linux-2023-ami.id
   instance_type               = var.instance_type
   key_name                    = aws_key_pair.this.key_name
@@ -43,7 +39,7 @@ resource "aws_instance" "myapp-server" {
   }
   connection {
     type        = "ssh"
-    user        = "ubuntu"
+    user        = "ec2-user"
     private_key = tls_private_key.oskey.private_key_pem
     host        = self.public_ip
   }
